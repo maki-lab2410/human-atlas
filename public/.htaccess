@@ -1,0 +1,44 @@
+# ─── Apache / cPanel Configuration for 3D Anatomy Studio ──────────────────
+
+<IfModule mod_mime.c>
+    # 3D GLTF / GLB models
+    AddType model/gltf-binary .glb
+    AddType model/gltf+json .gltf
+    # JSON data
+    AddType application/json .json
+    # WebAssembly if needed
+    AddType application/wasm .wasm
+    # Images & SVG
+    AddType image/svg+xml .svg .svgz
+</IfModule>
+
+<IfModule mod_headers.c>
+    # Enable CORS for assets (needed for Three.js WebGL model loaders)
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+    # Anti-cache for custom favicon
+    <FilesMatch "custom-favicon\.png">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires 0
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /3d-anatomy/
+
+    # Allow direct access to existing files and directories
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Don't rewrite PHP API calls
+    RewriteRule ^3d-anatomy/db\.php - [L]
+    RewriteRule ^db\.php - [L]
+
+    # Route everything else to index.html for SPA
+    RewriteRule ^ index.html [L]
+</IfModule>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#f3f4f4"/>
+  <meta name="description" content="An interactive atlas of the human body. Explore named anatomical structures, reveal organ systems, and inspect individual parts in 3D."/>
+  <title>3D Anatomy Lab.RM</title>
+  
+  <!-- Favicon Links (dibaca langsung oleh Safari & browser saat load awal) -->
+  <link id="app-favicon" rel="icon" type="image/png" href="/3d-anatomy/custom-favicon.png"/>
+  <link id="app-shortcut-favicon" rel="shortcut icon" type="image/png" href="/3d-anatomy/custom-favicon.png"/>
+  <link id="app-apple-favicon" rel="apple-touch-icon" href="/3d-anatomy/custom-favicon.png"/>
+
+  <!-- Inisialisasi awal sebelum React me-mount agar Safari langsung mengambil judul & icon terbaru -->
+  <script>
+    (function() {
+      try {
+        var customTitle = localStorage.getItem('customAppName');
+        if (customTitle) document.title = customTitle;
+
+        var t = localStorage.getItem('customFaviconTimestamp') || Date.now();
+        var u = '/3d-anatomy/custom-favicon.png?t=' + t;
+        var f = document.getElementById('app-favicon');
+        var s = document.getElementById('app-shortcut-favicon');
+        var a = document.getElementById('app-apple-favicon');
+        if (f) f.href = u;
+        if (s) s.href = u;
+        if (a) a.href = u;
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/main.tsx"></script>
+</body>
+</html>
