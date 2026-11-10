@@ -1,64 +1,127 @@
-# Human Atlas
+# 3D Human Atlas Explorer (Indonesian Edition & Tanya Maki AI)
 
-An interactive 3D anatomy explorer built with React, Three.js, and shadcn/ui. Take the BodyParts3D adult male reference apart into **2,234 individually selectable meshes**, explore **15 anatomical systems**, and search **3,432 named concepts**.
+An interactive 3D human anatomy explorer built with React 19, Three.js, Vite, and shadcn/ui. Explore the human body reference with **2,234 individually selectable meshes**, **15 anatomical systems**, and **3,432 named concepts** with Indonesian medical terminology and integrated AI assistance.
 
-**[Explore the live demo](https://human-atlas-seven.vercel.app)**
+🌐 **[Explore the Live Demo (Preview Hub)](http://43.173.41.238/preview-hub)**  
+🔗 **[Direct Production Deployment](https://emr.dinus.id/3d-anatomy/)**
 
-## Explore
+---
 
-- Orbit, zoom, and select structures directly on the body.
-- Toggle individual systems or use skeleton and organ presets.
-- Move from assembled anatomy to a spaced inventory of every visible piece.
-- Search anatomical names and source identifiers.
-- Isolate a selected structure and read its details.
-- Use compact controls and detail panels on mobile.
+## Fitur Utama / Key Features
 
-## Run locally
+- **Eksplorasi Anatomi 3D Interaktif**: Rotasi 360°, zoom, seleksi struktur organ, dan eksplorasi per sistem tubuh (Rangka, Otot, Jantung, Organ Sensorik, Arteri, dll.).
+- **Tampilan Rakit & Terurai (Exploded View)**: Berpindah dari bentuk tubuh utuh ke inventaris visual setiap komponen anatomi yang sedang aktif.
+- **Lokalisasi Medis Bahasa Indonesia**: Nama struktur, definisi organ, dan terminologi medis yang telah disesuaikan dengan standar terminologi medis Indonesia dan SNOMED CT.
+- **Tanya Maki (Asisten AI Cerdas)**: Chatbot pintar bertenaga Google Gemini API untuk konsultasi dan tanya-jawab anatomi manusia secara interaktif. Kunci API dan pemilihan model Gemini dapat diatur langsung melalui menu Pengaturan (Settings) di antarmuka web.
+- **Kustomisasi Branding Fleksibel**: Pengaturan judul aplikasi, logo header, dan favicon tab browser dinamis yang tersimpan secara lokal dan di server.
+- **Manajer Data Anatomi**: Manajemen basis data anatomi terintegrasi (`anatomy_db.json`) dengan opsi sinkronisasi ke server cPanel (`db.php`).
 
-Requires Node.js 22.13 or newer. No API keys or accounts are needed.
+---
 
-```sh
-npm ci
+## Persyaratan Sistem / Prerequisites
+
+- **Node.js**: Versi `22.13.0` atau yang lebih baru (disarankan Node.js 22 LTS atau 24).
+- **npm**: Versi `10.x` atau yang lebih baru.
+- **Python**: Versi `3.9+` (hanya jika ingin menjalankan script deployment FTP otomatis atau pemrosesan data).
+
+---
+
+## Panduan Instalasi & Menjalankan / Getting Started
+
+### 1. Clone Repositori
+
+```bash
+git clone https://github.com/maki-lab2410/human-atlas.git
+cd human-atlas
+```
+
+### 2. Instalasi Dependensi
+
+Jalankan perintah berikut untuk menginstal seluruh dependensi:
+
+```bash
+npm install
+```
+
+> **Catatan**: Anda juga dapat menggunakan `npm ci` jika ingin menginstal persis sesuai `package-lock.json`.
+
+### 3. Menjalankan Mode Pengembangan (Dev Server)
+
+```bash
 npm run dev
 ```
 
-Open http://localhost:3016. To build the static site, run `npm run build`; the output is in `dist/`.
+Buka peramban (browser) di alamat:
+- **`http://localhost:3016/3d-anatomy/`** (atau `http://localhost:3016/`)
 
-## Validate
+Aplikasi akan langsung berjalan tanpa memerlukan konfigurasi API eksternal di awal. Kunci API Gemini untuk fitur *Tanya Maki* dapat diinput langsung melalui tombol **Settings** di tampilan aplikasi.
 
-```sh
-npm run check
-node scripts/validate-atlas.mjs
-node scripts/validate-interactions.mjs
+---
+
+## Build & Validasi / Build & Validation
+
+### Build untuk Produksi
+
+```bash
 npm run build
 ```
 
-Validation covers mesh buffers, names and concept membership, nonoverlapping exploded layouts at desktop and mobile aspect ratios, search and inspection contracts, and tap-versus-drag handling. Browser interaction checks have exercised selection, system controls, search, isolation, rotation, and 390×844, 320×568, and 844×390 layouts. Phone controls stay clear of the exploded inventory, and isolated structures fit the space above or beside the detail panel. Physical-device performance and real multitouch hardware have not been tested.
+Berkas keluaran statis siap rilis akan disimpan di dalam folder `dist/`.
 
-## Anatomy data
+### Pengecekan Tipe TypeScript
 
-The current viewer uses **BodyParts3D 4.0**, an adult male reference anatomy, licensed **CC BY 4.0**. It does not represent every human structure or variation. Individual source meshes are distinct from named concepts, which may group multiple meshes. Descriptions distinguish general system context from individual organ explanations.
+```bash
+npm run check
+```
 
-Geometry is simplified for browser performance while retaining every source mesh. The packaged model contains 2,288,268 triangles and downloads approximately 33 MB of compressed geometry. Full credits, source links, and adaptation details are in [ATTRIBUTION.md](public/ATTRIBUTION.md).
+### Validasi Model & Interaksi
 
-This is an educational explorer, not a diagnostic or surgical tool.
+Validasi struktur mesh, hierarki konsep anatomi, tata letak exploded view, dan simulasi interaksi pengguna:
 
-## How it works
+```bash
+node scripts/validate-atlas.mjs
+node scripts/validate-interactions.mjs
+```
 
-Geometry is merged into batches. Per-structure GPU textures control translation, visibility, and selection, while component geometry supports accurate picking. Exploded layouts pack only the visible pieces. Rendering updates when the scene changes; orbit controls remain responsive without thousands of separate draw calls.
+---
 
-The optional WebMCP tools expose anatomy search and inspection in compatible browsers. The visible interface works without them.
+## Deployment
 
-## Rebuilding geometry
+### Opsi A: Deploy Otomatis ke cPanel via FTP/FTPS
 
-The repository includes browser-ready geometry. Rebuilding it is optional: obtain the official BodyParts3D OBJ archive and English metadata tables, prepare the joined concepts and display-system mappings, run `scripts/convert-anatomy.py`, then `node scripts/optimize-anatomy.mjs` and `node scripts/compress-models.mjs`. Simplification uses a 0.2% relative error limit per structure.
+Proyek ini telah dilengkapi script deploy otomatis via FTP/FTPS:
 
-## Deploy
+1. Salin template konfigurasi:
+   ```bash
+   cp .env.deploy.example .env.deploy
+   ```
+2. Isi informasi host, port, username, dan password FTP cPanel Anda pada file `.env.deploy` (file ini dilindungi `.gitignore` sehingga aman dan tidak akan terunggah ke repositori).
+3. Jalankan perintah deploy:
+   ```bash
+   npm run deploy
+   ```
+   *(Gunakan `npm run deploy:force` jika ingin mengunggah ulang seluruh file tanpa skip cache).*
 
-Import this repository into Vercel as a Vite project. The included `vercel.json` configures `npm ci`, `npm run build`, and the `dist` output directory. It can also be served by a static host.
+### Opsi B: Vercel / Static Hosting Lainnya
 
-## License
+Konfigurasi `vercel.json` telah disertakan. Cukup impor repositori ke Vercel sebagai proyek Vite, atau unggah konten folder `dist/` ke web server statis pilihan Anda (Nginx, Apache, Netlify, Cloudflare Pages).
 
-Original application code is released under the [MIT License](LICENSE). **The anatomy data has its own CC BY 4.0 license**; preserve the attribution when redistributing it. Third-party dependencies retain their respective licenses.
+---
 
-Issues and pull requests are welcome. Please include reproduction steps and browser/device details for interaction problems.
+## Data Anatomi & Atribusi / Anatomy Data & Attribution
+
+Model 3D viewer ini diadaptasi dari **BodyParts3D 4.0**, database referensi anatomi pria dewasa oleh *The Database Center for Life Science (DBCLS)*, berlisensi **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
+
+- **Lisensi Data**: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- **Sumber Data & Publikasi**: Mitsuhashi et al. (2009), *BodyParts3D: 3D structure database for anatomical concepts*. DOI: [10.1093/nar/gkn613](https://doi.org/10.1093/nar/gkn613)
+- Informasi kredit, modifikasi geometri, dan rincian atribusi lengkap dapat dilihat di [ATTRIBUTION.md](public/ATTRIBUTION.md).
+
+> *Aplikasi ini dirancang sebagai media edukasi dan eksplorasi anatomi interaktif, bukan sebagai perangkat diagnostik klinis atau pembedahan.*
+
+---
+
+## Lisensi / License
+
+Kode sumber aplikasi ini dirilis di bawah lisensi [MIT License](LICENSE).  
+Copyright (c) 2026 Maki (Mapping SNOMED CT & Indonesian Version)  
+Copyright (c) 2026 ashemag (Original Framework)
