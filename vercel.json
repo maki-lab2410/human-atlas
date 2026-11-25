@@ -1,1 +1,13 @@
-{"$schema":"https://openapi.vercel.sh/vercel.json","framework":"vite","buildCommand":"npm run build","outputDirectory":"dist","installCommand":"npm ci"}
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm ci",
+  "rewrites": [
+    { "source": "/3d-anatomy", "destination": "/index.html" },
+    { "source": "/3d-anatomy/", "destination": "/index.html" },
+    { "source": "/3d-anatomy/:path*", "destination": "/:path*" }
+  ]
+}
+
