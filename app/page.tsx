@@ -15,6 +15,7 @@ import {Combobox,ComboboxInput,ComboboxContent,ComboboxList,ComboboxItem,Combobo
 import AnatomyScene from './scene';
 import DataManager, {type MedicalDb} from './components/DataManager';
 import AdminAuthModal, {isAdminLoggedIn, adminLogout, getAdminPassword, ChangePasswordForm} from './components/AdminAuth';
+import UpdatePanel from './components/UpdatePanel';
 import GeminiSettings from './components/GeminiSettings';
 import TerminologyLab from './components/TerminologyLab';
 import {DEFAULT_VISIBLE,SYSTEMS,EXPLANATIONS,explanation,type Atlas,type Concept,type SceneState,type SystemId,type View} from './anatomy';
@@ -604,6 +605,12 @@ export default function Home(){
 
         {/* Admin Password Section */}
         <ChangePasswordForm />
+
+        {/* Divider */}
+        <div className="border-t border-gray-100 my-4"/>
+
+        {/* Pembaruan Aplikasi (Self-Hosted) */}
+        <UpdatePanel />
 
         {/* Admin Logout */}
         {isAdminLoggedIn() && (

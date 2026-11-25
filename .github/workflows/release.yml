@@ -1,0 +1,133 @@
+name: Build & Publish Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag rilis (contoh: v1.0.1)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate terminology data & run tests
+        run: |
+          python3 scripts/build-terminologi.py
+          php dev/tests/quiz_consistency.php
+          npm run check
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Stamp version & package release ZIPs
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, zipfile
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          tag = os.environ.get('INPUT_TAG') or os.environ['GITHUB_REF_NAME']
+          ver = tag.lstrip('v')
+          repo = os.environ['GITHUB_REPOSITORY']
+          now = datetime.now(timezone.utc).isoformat()
+
+          dist = Path('dist')
+          out_dir = Path('release-artifacts')
+          out_dir.mkdir(exist_ok=True)
+
+          # Stamp dist/3d-anatomy/version.json
+          vfile = dist / '3d-anatomy' / 'version.json'
+          vfile.write_text(json.dumps({
+              'version': ver,
+              'repo': repo,
+              'channel': 'releases',
+              'published_at': now,
+          }, indent=2) + '\n', encoding='utf-8')
+
+          excluded_exact = {
+              '3d-anatomy/.htadmin_pass',
+              '3d-anatomy/.admin_pass',
+              '3d-anatomy/custom-favicon.png',
+              '3d-anatomy/lab/config.php',
+          }
+
+          app_zip_path = out_dir / 'human-atlas-app.zip'
+          models_zip_path = out_dir / 'human-atlas-models.zip'
+
+          with zipfile.ZipFile(app_zip_path, 'w', zipfile.ZIP_DEFLATED) as az, \
+               zipfile.ZipFile(models_zip_path, 'w', zipfile.ZIP_DEFLATED) as mz:
+              for p in sorted(dist.rglob('*')):
+                  if not p.is_file():
+                      continue
+                  rel = p.relative_to(dist).as_posix()
+                  if rel.startswith('models/'):
+                      mz.write(p, rel)
+                      continue
+                  if rel in excluded_exact or rel.startswith('3d-anatomy/lab/data/'):
+                      continue
+                  az.write(p, rel)
+
+          def sha256(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open('rb') as f:
+                  for chunk in iter(lambda: f.read(65536), b''):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          manifest = {
+              'version': ver,
+              'tag': tag,
+              'repo': repo,
+              'published_at': now,
+              'app_zip': app_zip_path.name,
+              'app_size': app_zip_path.stat().st_size,
+              'app_sha256': sha256(app_zip_path),
+              'models_zip': models_zip_path.name,
+              'models_size': models_zip_path.stat().st_size,
+              'models_sha256': sha256(models_zip_path),
+              'preserved_paths': sorted(excluded_exact | {'3d-anatomy/lab/data/', '3d-anatomy/anatomy_db.json', 'models/'}),
+          }
+          (out_dir / 'release-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(manifest, indent=2))
+          PY
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          TAG="${INPUT_TAG:-$GITHUB_REF_NAME}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" release-artifacts/* --clobber
+          else
+            gh release create "$TAG" release-artifacts/* \
+              --title "Human Atlas $TAG" \
+              --generate-notes
+          fi

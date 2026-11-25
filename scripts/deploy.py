@@ -184,8 +184,12 @@ def sync_directory(ftp, local_dir: Path, remote_base: str, force=False):
         remote_size = remote_sizes.get(filename)
 
         # Smart Skip jika ukuran file identik dan bukan force deploy
-        # Jangan skip index.html, .htaccess, atau .php karena perubahan isi/hash sering memiliki ukuran byte yang sama
-        always_upload = filename in ('index.html', '.htaccess', 'terminologi.json') or local_file.suffix.lower() == '.php'
+        # Jangan skip file konfigurasi/entry yang ukurannya bisa sama meski berubah
+        always_upload = filename in ('index.html', '.htaccess', 'terminologi.json', 'version.json') or local_file.suffix.lower() == '.php'
+        # Lindungi anatomy_db.json di server agar hasil edit via Web Database tidak tertimpa (kecuali --force)
+        if not force and filename == 'anatomy_db.json' and remote_size is not None:
+            total_skipped += 1
+            continue
         if not force and not always_upload and remote_size is not None and remote_size == local_size:
             total_skipped += 1
             continue

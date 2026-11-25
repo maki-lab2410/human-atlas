@@ -106,6 +106,19 @@ Konfigurasi `vercel.json` telah disertakan. Cukup impor repositori ke Vercel seb
 
 ---
 
+## Update Otomatis (Self-Hosted)
+
+Untuk instansi atau pengguna lain yang memasang aplikasi ini di server PHP/cPanel sendiri dan ingin mengikuti pembaruan resmi dari repositori ini:
+
+1. Setiap rilis bertanda `v*` otomatis mempublikasikan dua arsip terpisah di **GitHub Releases** (via `.github/workflows/release.yml`):
+   - **`human-atlas-app.zip` (~3–4 MB):** kode frontend hasil build, backend PHP, dan data terminologi.
+   - **`human-atlas-models.zip` (~189 MB):** aset model 3D (cukup dipasang saat instalasi awal atau bila aset 3D berubah).
+   - **`release-manifest.json`:** versi dan checksum **SHA-256**.
+2. Di aplikasi Anda, buka **Settings → Pembaruan Aplikasi → Cek Pembaruan**, lalu klik **Pasang Update** (wajib password Administrator `.htadmin_pass`).
+3. File lokal server (`3d-anatomy/lab/config.php`, `3d-anatomy/lab/data/lab.sqlite`, `3d-anatomy/.htadmin_pass`, `3d-anatomy/custom-favicon.png`, `models/`, serta `3d-anatomy/anatomy_db.json` bila sudah ada di server) **otomatis dilindungi dan tidak pernah ditimpa**, disertai opsi **Rollback** 1-klik ke versi sebelumnya.
+
+---
+
 ## Data Anatomi & Atribusi / Anatomy Data & Attribution
 
 Model 3D viewer ini diadaptasi dari **BodyParts3D 4.0**, database referensi anatomi pria dewasa oleh *The Database Center for Life Science (DBCLS)*, berlisensi **Creative Commons Attribution 4.0 International (CC BY 4.0)**.

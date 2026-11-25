@@ -1,7 +1,7 @@
 # ─── Apache / cPanel Configuration for 3D Anatomy Studio ──────────────────
 
-# ─── Keamanan: berkas tersembunyi (mis. .admin_pass lama, .htadmin_pass) dan skrip CLI tidak boleh diunduh
-<FilesMatch "^(\..*|set-admin-pass\.php)$">
+# ─── Keamanan: berkas tersembunyi (mis. .admin_pass lama, .htadmin_pass), helper internal, dan skrip CLI tidak boleh diunduh
+<FilesMatch "^(\..*|set-admin-pass\.php|_admin_auth\.php)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>
@@ -30,7 +30,7 @@
     Header set Access-Control-Allow-Headers "Content-Type, Authorization"
 
     # API admin berbasis password: jangan izinkan CORS lintas-asal
-    <FilesMatch "^db\.php$">
+    <FilesMatch "^(db|updater)\.php$">
         Header unset Access-Control-Allow-Origin
         Header unset Access-Control-Allow-Methods
         Header unset Access-Control-Allow-Headers
@@ -54,8 +54,8 @@
     RewriteRule ^ - [L]
 
     # Don't rewrite PHP API calls
-    RewriteRule ^3d-anatomy/db\.php - [L]
-    RewriteRule ^db\.php - [L]
+    RewriteRule ^3d-anatomy/(db|updater)\.php - [L]
+    RewriteRule ^(db|updater)\.php - [L]
 
     # Route everything else to index.html for SPA
     RewriteRule ^ index.html [L]
