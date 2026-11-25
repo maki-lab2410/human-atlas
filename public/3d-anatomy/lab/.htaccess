@@ -1,0 +1,12 @@
+# Lab Terminologi — hanya api.php dan sso.php yang boleh diakses langsung
+<FilesMatch "^(_lib\.php|_quiz\.php|terminologi\.json|config(\.[a-z]+)?\.php|config\.example\.php)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes
+<IfModule mod_headers.c>
+    # API berbasis cookie: jangan izinkan CORS lintas-asal
+    Header unset Access-Control-Allow-Origin
+    Header unset Access-Control-Allow-Methods
+    Header unset Access-Control-Allow-Headers
+    Header set Cache-Control "no-store"
+</IfModule>
